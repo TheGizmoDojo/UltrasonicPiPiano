@@ -9,6 +9,7 @@ struct Key {
 trait Synth {
   fn note_on(&self, channel: u8, note: u8, velocity: u8);
   fn note_off(&self, channel: u8, note: u8);
+  fn set_instrument(&self, channel: u8, instrument: u8);
 }
 
 struct Fluidsynth;
@@ -23,6 +24,9 @@ impl Synth for Fluidsynth {
     println!("noteoff {} {}", channel, note);
   }
 
+  fn set_instrument(&self, channel: u8, instrument: u8) {
+    println!("prog {} {}", channel, instrument);
+  }
 }
 
 
@@ -50,11 +54,16 @@ fn main() {
 
   let start_note = 12; // C0
 
-  let channel = 1; // single channel for now
-  println!("prog 1 18"); // organ
+  let instruments : Vec<u8> = vec![ 1, 10, 18, 25, 41, 53, 65, 119 ];
+
+  for i in 0 .. 8 {  
+    synth.set_instrument(i as u8 + 1, instruments[i]);
+  }
 
   loop {
     for i in 0 .. 8 {
+
+      let channel = i as u8 + 1;
 
       // get sensor reading
       let distance = octasonic.get_sensor_reading(i as u8);

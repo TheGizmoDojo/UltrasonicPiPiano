@@ -1,33 +1,29 @@
 extern crate octasonic;
 use octasonic::Octasonic;
 
-use std::thread::sleep;
-use std::time::Duration;
-
 struct Key {
   note: u8,
   counter: u8
 }
 
 trait Synth {
-  fn noteOn(&self, channel: u8, note: u8, velocity: u8);
-  fn noteOff(&self, channel: u8, note: u8);
+  fn note_on(&self, channel: u8, note: u8, velocity: u8);
+  fn note_off(&self, channel: u8, note: u8);
 }
 
 struct Fluidsynth;
 
 impl Synth for Fluidsynth {
 
-  fn noteOn(&self, channel: u8, note: u8, velocity: u8) {
+  fn note_on(&self, channel: u8, note: u8, velocity: u8) {
     println!("noteon {} {} {}", channel, note, velocity);
   }
   
-  fn noteOff(&self, channel: u8, note: u8) {
+  fn note_off(&self, channel: u8, note: u8) {
     println!("noteoff {} {}", channel, note);
   }
 
 }
-
 
 
 fn main() {
@@ -66,19 +62,23 @@ fn main() {
       if distance < max_distance {
         let scale_start = start_note + 12 * i as u8;
         let new_note = scale_start + scale[(distance%7) as usize];
-        //let new_note = scale_start + scale[(distance/cm_per_note) as usize];
         if new_note != key[i].note {
-          println!("noteoff {} {}", channel, key[i].note);
+
+          // stop the previous note on this key (if any) from playing
+          if key[i].note > 0 {
+            synth.note_off(channel, key[i].note);
+          }
+
+          // play the new note
           key[i].note = new_note;
-          println!("noteon {} {} {}", channel, key[i].note, velocity);
+          synth.note_on(channel, key[i].note, velocity);
         }
       } else if key[i].note > 0 {
         key[i].counter = key[i].counter + 1;
         if key[i].counter == 100 {
-          println!("noteoff {} {}", channel, key[i].note);
+          synth.note_off(channel, key[i].note);
           key[i].counter = 0;
           key[i].note = 0;
-
         }
       }
     } 

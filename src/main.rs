@@ -5,12 +5,34 @@ use std::thread::sleep;
 use std::time::Duration;
 
 struct Key {
-  playing: bool,
+  note: u8,
   counter: u8
 }
 
+trait Synth {
+  fn noteOn(&self, channel: u8, note: u8, velocity: u8);
+  fn noteOff(&self, channel: u8, note: u8);
+}
+
+struct Fluidsynth;
+
+impl Synth for Fluidsynth {
+
+  fn noteOn(&self, channel: u8, note: u8, velocity: u8) {
+    println!("noteon {} {} {}", channel, note, velocity);
+  }
+  
+  fn noteOff(&self, channel: u8, note: u8) {
+    println!("noteoff {} {}", channel, note);
+  }
+
+}
+
+
 
 fn main() {
+
+  let synth = Fluidsynth;
 
   let octasonic = Octasonic::new(8).unwrap();
 
@@ -22,17 +44,18 @@ fn main() {
   // init key state
   let mut key : Vec<Key> = vec![];
   for _ in 0 .. 8 {
-    key.push(Key { playing: false, counter: 0 });
+    key.push(Key { note: 0, counter: 0 });
   }
 
   let cm_per_note = 2;
   let max_distance : u8 = 7 * cm_per_note;
 
-  let mut note : Vec<u8> = vec![ 0_u8; 8 ];
+  let velocity = 127;
+
+  let start_note = 12; // C0
 
   let channel = 1; // single channel for now
-
-  let start_note = 24; // C1
+  println!("prog 1 18"); // organ
 
   loop {
     for i in 0 .. 8 {
@@ -44,14 +67,20 @@ fn main() {
         let scale_start = start_note + 12 * i as u8;
         let new_note = scale_start + scale[(distance%7) as usize];
         //let new_note = scale_start + scale[(distance/cm_per_note) as usize];
-        if new_note != note[i] {
-          let velocity = 127;
-          note[i] = new_note;
-          println!("noteon {} {} {}", channel, note[i], velocity);
+        if new_note != key[i].note {
+          println!("noteoff {} {}", channel, key[i].note);
+          key[i].note = new_note;
+          println!("noteon {} {} {}", channel, key[i].note, velocity);
+        }
+      } else if key[i].note > 0 {
+        key[i].counter = key[i].counter + 1;
+        if key[i].counter == 100 {
+          println!("noteoff {} {}", channel, key[i].note);
+          key[i].counter = 0;
+          key[i].note = 0;
+
         }
       }
-
     } 
-//    sleep(Duration::from_millis(50));
   }
 }

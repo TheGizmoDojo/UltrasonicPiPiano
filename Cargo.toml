@@ -1,0 +1,7 @@
+[package]
+name = "sonic_sounds"
+version = "0.1.0"
+authors = ["Andy Grove <andygrove73@gmail.com>"]
+
+[dependencies]
+octasonic = "0.1.0"

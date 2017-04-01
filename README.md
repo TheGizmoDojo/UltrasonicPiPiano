@@ -10,6 +10,10 @@ The piano example generates MIDI instructions based on sensor readings and write
 
 This output can be piped into fluidsynth to generate music.
 
+# Video
+
+[![Raspberry Pi Octasonic Piano](https://img.youtube.com/vi/3iLIQvG_j-8/0.jpg)](https://www.youtube.com/watch?v=3iLIQvG_j-8)
+
 # Wiring
 
 TBD
@@ -40,6 +44,8 @@ curl https://sh.rustup.rs -sSf | sh
 ## Compile this code.
 
 ```
+git clone git@github.com:TheGizmoDojo/SonicSounds.git
+cd SonicSounds
 cargo build --release 
 ```
 

@@ -1,44 +1,29 @@
 extern crate octasonic;
 use octasonic::Octasonic;
 
+mod synth;
+use synth::*;
+
+/// State associated with each key
 struct Key {
+  /// The MIDI note number for the currently playing note, or 0 for no note
   note: u8,
+  /// Counter for how many cycles the note has been playing
   counter: u8
 }
 
-trait Synth {
-  fn note_on(&self, channel: u8, note: u8, velocity: u8);
-  fn note_off(&self, channel: u8, note: u8);
-  fn set_instrument(&self, channel: u8, instrument: u8);
-}
-
-struct Fluidsynth;
-
-impl Synth for Fluidsynth {
-
-  fn note_on(&self, channel: u8, note: u8, velocity: u8) {
-    println!("noteon {} {} {}", channel, note, velocity);
-  }
-  
-  fn note_off(&self, channel: u8, note: u8) {
-    println!("noteoff {} {}", channel, note);
-  }
-
-  fn set_instrument(&self, channel: u8, instrument: u8) {
-    println!("prog {} {}", channel, instrument);
-  }
-}
-
-
 fn main() {
 
-  let synth = Fluidsynth;
+  let synth = Fluidsynth {};
 
+  // Configure the octasonic breakout board
   let octasonic = Octasonic::new(8).unwrap();
-
   octasonic.set_max_distance(100);
   octasonic.set_interval(0);
 
+  // Scale to play for each octave
+  // The numbers are zero-based indexes into a 12-note octave
+  // C scale : 0, 2, 4, 5, 7, 9, 11 (C, D, E, F, G, A, B)
   let scale : Vec<u8> = vec![0, 2, 4, 5, 7, 9, 11 ];
 
   // init key state

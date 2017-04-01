@@ -55,3 +55,11 @@ This runs the sonic_sounds application and pipes the stdout output into the stdi
 ```
 ./target/release/sonic_sounds | fluidsynth -a alsa -g 0.5 -l /usr/share/sounds/sf2/FluidR3_GM.sf2
 ```
+
+# Troubleshooting
+
+If there is no audio from the audio jack, run this command to force audio to the headphone jack rather than HDMI:
+
+```
+sudo amixer cset numid=3 1
+```

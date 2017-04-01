@@ -56,6 +56,16 @@ This runs the sonic_sounds application and pipes the stdout output into the stdi
 ./target/release/sonic_sounds | fluidsynth -a alsa -g 0.5 -l /usr/share/sounds/sf2/FluidR3_GM.sf2
 ```
 
+# Run on startup
+
+Add this to `/etc/rc.local` and be sure to use the correct paths for where you installed this software.
+
+```
+source /home/pi/.cargo/env
+cd /home/pi/projects/SonicSounds
+./run.sh
+```
+
 # Troubleshooting
 
 If there is no audio from the audio jack, run this command to force audio to the headphone jack rather than HDMI:

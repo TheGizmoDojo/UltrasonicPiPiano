@@ -41,7 +41,7 @@ fn main() {
   // choose MIDI instrument to associate with each key
   // see https://en.wikipedia.org/wiki/General_MIDI
   // 1 = Piano, 14 = Xylophone, 18 = Percussive Organ, 41 = Violin
-  let instruments : Vec<u8> = vec![ 1, 10, 18, 25, 41, 53, 65, 119 ];
+  let instruments : Vec<u8> = vec![ 1, 10, 18, 25, 41, 89, 49, 14 ];
 
   // we use a fixed velocity of 127 (the max value)
   let velocity = 127;
@@ -73,6 +73,9 @@ fn main() {
 
   let mut gesture : u8 = 0;
   let mut gesture_counter : u32 = 0;
+
+  // play scale to indicate that the instrument is ready
+  synth.play_scale(1, 48, 12);
 
   loop {
     for i in 0 .. 8 {

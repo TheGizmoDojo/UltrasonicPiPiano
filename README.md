@@ -61,7 +61,7 @@ This runs the sonic_sounds application and pipes the stdout output into the stdi
 Add this to `/etc/rc.local` and be sure to use the correct paths for where you installed this software.
 
 ```
-source /home/pi/.cargo/env
+. /home/pi/.cargo/env
 cd /home/pi/projects/SonicSounds
 ./run.sh
 ```

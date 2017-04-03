@@ -1,6 +1,6 @@
 # SonicSounds - Making music on the Raspberry Pi with ultrasonic sensors for input
 
-This code is written for Raspberry Pi with an attached <a href="https://www.tindie.com/products/andygrove73/octasonic-8-x-hc-sr04-ultrasonic-breakout-board/">Octasonic 8 x HC-SR04 breakout board</a>. 
+This code is written for Raspberry Pi with an attached <a href="https://www.tindie.com/products/andygrove73/octasonic-8-x-hc-sr04-ultrasonic-breakout-board/">Octasonic 8 x HC-SR04 breakout board</a>. A <a href="https://www.sparkfun.com/products/12009">logic level converter</a> is also required.
 
 This code has been tested on a Raspberry Pi 3 Model B running Raspian Jessie and Rust stable 1.16.0
 
@@ -15,6 +15,24 @@ This output can be piped into fluidsynth to generate music.
 [![Raspberry Pi Octasonic Piano](https://img.youtube.com/vi/3iLIQvG_j-8/0.jpg)](https://www.youtube.com/watch?v=3iLIQvG_j-8)
 
 # Wiring
+
+|Raspberry Pi|Logic Level Converter|
+|---------|---------------------|
+||LV1|
+||LV2|
+||LV|
+||GND|
+||LV3|
+||LV4|
+
+|Octasonic|Logic Level Converter|
+|---------|---------------------|
+|5V|HV|
+|SCK|HV4|
+|MISO|HV3|
+|MOSI|HV2|
+|SS|HV1|
+|GND|GND|
 
 TBD
 

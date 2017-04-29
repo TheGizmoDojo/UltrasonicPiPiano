@@ -6,5 +6,5 @@ There is a detailed [instructable](https://www.instructables.com/id/Ultrasonic-P
 
 # Video
 
-[![Raspberry Pi Octasonic Piano](ihttps://img.youtube.com/vi/eXgCb6xm2Ug/0.jpg)](https://youtu.be/eXgCb6xm2Ug)
+[![Raspberry Pi Octasonic Piano](https://img.youtube.com/vi/eXgCb6xm2Ug/0.jpg)](https://youtu.be/eXgCb6xm2Ug)
 

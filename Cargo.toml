@@ -1,7 +1,8 @@
 [package]
-name = "sonic_sounds"
-version = "0.1.0"
+name = "ultrasonic_piano"
+version = "0.2.0"
 authors = ["Andy Grove <andygrove73@gmail.com>"]
 
 [dependencies]
 octasonic = "0.1.0"
+argparse = "0.2.1"

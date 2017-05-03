@@ -1,8 +1,17 @@
 extern crate octasonic;
 use octasonic::Octasonic;
 
+extern crate argparse;
+use argparse::{ArgumentParser, Store, List};
+
 mod synth;
 use synth::*;
+
+#[derive(Debug)]
+enum Mode {
+  Modulus,
+  Linear
+}
 
 /// State associated with each key
 struct Key {
@@ -41,19 +50,42 @@ fn main() {
   // choose MIDI instrument to associate with each key
   // see https://en.wikipedia.org/wiki/General_MIDI
   // 1 = Piano, 14 = Xylophone, 18 = Percussive Organ, 41 = Violin
-  let instruments : Vec<u8> = vec![ 1, 10, 18, 25, 41, 89, 49, 14 ];
+  let mut instruments : Vec<u8> = vec![ 1, 10, 18, 25, 41, 89, 49, 14 ];
 
   // we use a fixed velocity of 127 (the max value)
   let velocity = 127;
 
   // determine the max distance to measure
-  let cm_per_note = 2;
+  let mut cm_per_note = 5;
+  let mut mode_string = "linear".to_string();
+
+  {
+    let mut ap = ArgumentParser::new();
+    ap.refer(&mut cm_per_note)
+      .add_option(&["-n", "--cm-per-note"], Store, "Distance allocated to each note");
+    ap.refer(&mut mode_string)
+      .add_option(&["-m", "--mode"], Store, "Mode (linear or modulus)");
+    ap.refer(&mut instruments)
+      .add_argument("instruments", List, "MIDI instrument numbers");
+    ap.parse_args_or_exit();
+  }
+
+  let mode = match mode_string.as_ref() {
+    "linear" => Mode::Linear,
+    _ => Mode::Modulus
+  };
+
+  println!("# cm_per_note = {}", cm_per_note);
+  println!("# mode = {:?}", mode);
+  println!("# instruments: {:?}", instruments);
+
+
   let max_distance : u8 = scale.len() as u8 * cm_per_note;
 
   // Configure the octasonic breakout board
   let octasonic = Octasonic::new(8).unwrap();
   octasonic.set_max_distance(2); // 2= 48 cm
-  octasonic.set_interval(2); // no pause between taking sensor readings
+  octasonic.set_interval(0); // no pause between taking sensor readings
   let mut distance = vec![0_u8; 8];
 
   // init key state
@@ -67,7 +99,6 @@ fn main() {
   // create the synth and set instruments per channel
   let synth = Fluidsynth {};
   for i in 0 .. 8 {
-    //synth.set_instrument(i as u8 + 1, instruments[i]);
     synth.set_instrument(i as u8 + 1, instruments[instrument_index]);
   }
 
@@ -93,7 +124,10 @@ fn main() {
 
         // this is a bit funky ... we use modulus to pick the note within the scale ... it
         // seemed to sound better than trying to divide the distance by the number of notes
-        let new_note = scale_start + scale[(distance[i]%7) as usize];
+        let new_note = match mode {
+          Mode::Modulus => scale_start + scale[(distance[i]%7) as usize],
+          Mode::Linear => scale_start + scale[(distance[i]/cm_per_note) as usize]
+        };
 
         // is this a different note to the one already playing?
         if new_note != key[i].note {

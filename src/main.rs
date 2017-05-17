@@ -1,3 +1,5 @@
+use std::process::Command;
+
 extern crate octasonic;
 use octasonic::Octasonic;
 
@@ -59,7 +61,8 @@ fn main() {
   let mut cm_per_note = 5;
   let mut mode_string = "linear".to_string();
 
-  let mut gesture_change_instrument = 129_u8;
+  let mut gesture_change_instrument = 129_u8; // two outermost sensors
+  let mut gesture_shutdown = 24_u8; // middle two sensors
 
   {
     let mut ap = ArgumentParser::new();
@@ -71,6 +74,8 @@ fn main() {
       .add_argument("instruments", List, "MIDI instrument numbers");
     ap.refer(&mut gesture_change_instrument)
       .add_argument("gesture_change_instrument", Store, "Gesture for changing instrument");
+    ap.refer(&mut gesture_shutdown)
+      .add_argument("gesture_shutdown", Store, "Gesture for shutting down");
     ap.parse_args_or_exit();
   }
 
@@ -181,6 +186,21 @@ fn main() {
 
             // play a quick scale to indicate that the instrument changed
             synth.play_scale(1, 48, 12);
+        } else if gesture == gesture_shutdown {
+
+            // stop existing notes
+            for i in 0 .. 8 { synth.note_off(i+1, key[i as usize].note) }
+
+            // play a quick scale to indicate that the gesture was recognized
+            synth.play_scale(1, 48, 12);
+
+            // issue shutdown command
+            Command::new("sh")
+              .arg("-c")
+              .arg("shutdown now")
+              .output()
+              .expect("failed to execute shutdown command");
+
         }
 
         gesture_counter = 0;

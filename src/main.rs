@@ -59,6 +59,8 @@ fn main() {
   let mut cm_per_note = 5;
   let mut mode_string = "linear".to_string();
 
+  let mut gesture_change_instrument = 129_u8;
+
   {
     let mut ap = ArgumentParser::new();
     ap.refer(&mut cm_per_note)
@@ -67,6 +69,8 @@ fn main() {
       .add_option(&["-m", "--mode"], Store, "Mode (linear or modulus)");
     ap.refer(&mut instruments)
       .add_argument("instruments", List, "MIDI instrument numbers");
+    ap.refer(&mut gesture_change_instrument)
+      .add_argument("gesture_change_instrument", Store, "Gesture for changing instrument");
     ap.parse_args_or_exit();
   }
 
@@ -162,20 +166,23 @@ fn main() {
     if gesture == new_gesture {
       gesture_counter += 1;
       if gesture_counter == 100 {
-        if gesture == 129 {
 
-          // stop existing notes
-          for i in 0 .. 8 { synth.note_off(i+1, key[i as usize].note) }
+        if gesture == gesture_change_instrument {
 
-          // choose the next instrument
-          instrument_index += 1;
-          if instrument_index == instruments.len() { instrument_index = 0; }
-          for i in 0 .. 8 { synth.set_instrument(i as u8 + 1, instruments[instrument_index]); }
+            // stop existing notes
+            for i in 0 .. 8 { synth.note_off(i+1, key[i as usize].note) }
 
-          // play a quick scale to indicate that the instrument changed
-          synth.play_scale(1, 48, 12);
+            // choose the next instrument
+            instrument_index += 1;
+            if instrument_index == instruments.len() { instrument_index = 0; }
+            for i in 0 .. 8 { 
+              synth.set_instrument(i as u8 + 1, instruments[instrument_index]); 
+            }
 
+            // play a quick scale to indicate that the instrument changed
+            synth.play_scale(1, 48, 12);
         }
+
         gesture_counter = 0;
       }
     } else { 

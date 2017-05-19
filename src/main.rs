@@ -92,7 +92,10 @@ fn main() {
   let max_distance : u8 = scale.len() as u8 * cm_per_note;
 
   // Configure the octasonic breakout board
-  let octasonic = Octasonic::new(8).unwrap();
+  let octasonic = match Octasonic::new(8) {
+    Ok(o) => o,
+    Err(_) => panic!("Failed to initialize SPI - have you enabled SPI in the Raspberry Pi Configuration Utility?")
+  };	
   octasonic.set_max_distance(2); // 2= 48 cm
   octasonic.set_interval(0); // no pause between taking sensor readings
   let mut distance = vec![0_u8; 8];

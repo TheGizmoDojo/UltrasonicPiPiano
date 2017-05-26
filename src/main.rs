@@ -70,12 +70,12 @@ fn main() {
       .add_option(&["-n", "--cm-per-note"], Store, "Distance allocated to each note");
     ap.refer(&mut mode_string)
       .add_option(&["-m", "--mode"], Store, "Mode (linear or modulus)");
-    ap.refer(&mut instruments)
-      .add_argument("instruments", List, "MIDI instrument numbers");
     ap.refer(&mut gesture_change_instrument)
-      .add_argument("gesture_change_instrument", Store, "Gesture for changing instrument");
+      .add_option(&["-c", "--gesture_change_instrument"], Store, "Gesture for changing instrument");
     ap.refer(&mut gesture_shutdown)
-      .add_argument("gesture_shutdown", Store, "Gesture for shutting down");
+      .add_option(&["-s", "--gesture_shutdown"], Store, "Gesture for shutting down");
+    ap.refer(&mut instruments)
+        .add_argument("instruments", List, "MIDI instrument numbers");
     ap.parse_args_or_exit();
   }
 

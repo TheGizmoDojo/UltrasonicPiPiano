@@ -49,3 +49,12 @@ exit 0
 ```
 
 If the code doesn't start running on bootup, check the log at `/var/log/ultrasonic-pi.log` for error messages.
+
+# Stopping the program from running
+
+To stop the program from running in the background, run the following command:
+
+```
+sudo killall -9 ultrasonic_piano
+```
+

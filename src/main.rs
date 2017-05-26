@@ -97,7 +97,7 @@ fn main() {
     Err(_) => panic!("Failed to initialize SPI - have you enabled SPI in the Raspberry Pi Configuration Utility?")
   };	
   octasonic.set_max_distance(2); // 2= 48 cm
-  octasonic.set_interval(0); // no pause between taking sensor readings
+  octasonic.set_interval(2); // no pause between taking sensor readings
   let mut distance = vec![0_u8; 8];
 
   // init key state

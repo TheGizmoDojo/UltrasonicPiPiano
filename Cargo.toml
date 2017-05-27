@@ -1,8 +1,9 @@
 [package]
 name = "ultrasonic_piano"
-version = "0.2.0"
+version = "0.4.0"
 authors = ["Andy Grove <andygrove73@gmail.com>"]
 
 [dependencies]
 octasonic = "0.1.0"
 argparse = "0.2.1"
+sysfs_gpio = "0.5.0"

@@ -5,7 +5,7 @@ pub trait Synth {
     fn note_on(&self, channel: u8, note: u8, velocity: u8);
     fn note_off(&self, channel: u8, note: u8);
     fn set_instrument(&self, channel: u8, instrument: u8);
-    fn play_scale(&self, channel: u8, start_note: u8, count: u8);
+    fn play_scale(&self, channel: u8, start_note: u8, count: i8);
 }
 
 /// struct to represent a fluidsynth process
@@ -28,11 +28,11 @@ impl Synth for Fluidsynth {
     }
 
 
-    fn play_scale(&self, channel: u8, start_note: u8, count: u8) {
+    fn play_scale(&self, channel: u8, start_note: u8, count: i8) {
       for i in 0 .. count {
-        let note = start_note + i;
+        let note = (start_note as i8 + i) as u8;
         self.note_on(channel, note, 127);
-        thread::sleep(time::Duration::from_millis(200));
+        thread::sleep(time::Duration::from_millis(250));
         self.note_off(channel, note);
       }
     }

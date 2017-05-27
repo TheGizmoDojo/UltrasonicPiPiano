@@ -1,7 +1,12 @@
 use std::process::Command;
+//use std::time::Duration;
+//use std::thread::sleep;
 
 extern crate octasonic;
 use octasonic::Octasonic;
+
+extern crate sysfs_gpio;
+use sysfs_gpio::{Direction, Pin};
 
 extern crate argparse;
 use argparse::{ArgumentParser, Store, List};
@@ -44,6 +49,18 @@ fn main() {
   // The numbers are zero-based indexes into a 12-note octave
   // C scale : 0, 2, 4, 5, 7, 9, 11 (C, D, E, F, G, A, B)
   let scale : Vec<u8> = vec![0, 2, 4, 5, 7, 9, 11 ];
+
+  // set GPIO21 as input for shutting down the pi
+  // connect to 3.3V to shutdown
+  let pin = Pin::new(21);
+  match pin.export() {
+    Ok(_) => println!("# pin exported OK"),
+    Err(_) => println!("# Failed to export pin. Did you enable GPIO?")
+  }
+  match pin.set_direction(Direction::In) {
+    Ok(_) => println!("# set pin direction to IN"),
+    Err(_) => println!("# Failed to set pin direction to IN")
+  }
 
   // Set the lowest note on the keyboard
   // C0 = 12, C1 = 24, C2 = 36, ...
@@ -121,6 +138,12 @@ fn main() {
   synth.play_scale(1, 48, 12);
 
   loop {
+
+    match pin.get_value() {
+      Ok(n) if n == 1 => shutdown(&synth, &key),
+      _ => {}
+    }
+
     for i in 0 .. 8 {
 
       let channel = i as u8 + 1;
@@ -190,20 +213,7 @@ fn main() {
             // play a quick scale to indicate that the instrument changed
             synth.play_scale(1, 48, 12);
         } else if gesture == gesture_shutdown {
-
-            // stop existing notes
-            for i in 0 .. 8 { synth.note_off(i+1, key[i as usize].note) }
-
-            // play a quick scale to indicate that the gesture was recognized
-            synth.play_scale(1, 48, 12);
-
-            // issue shutdown command
-            Command::new("sh")
-              .arg("-c")
-              .arg("shutdown now")
-              .output()
-              .expect("failed to execute shutdown command");
-
+            shutdown(&synth, &key);
         }
 
         gesture_counter = 0;
@@ -216,3 +226,23 @@ fn main() {
     }
   }
 }
+
+fn shutdown(synth: &Synth, key: &Vec<Key>) {
+  println!("# shutting down");
+            
+  // stop existing notes
+  for i in 0 .. 8 { synth.note_off(i+1, key[i as usize].note) }
+ 
+  // play scale (hi to lo)
+  synth.play_scale(1, 48, 12);
+
+  // issue shutdown command
+  Command::new("sh")
+    .arg("-c")
+    .arg("shutdown now")
+    .output()
+    .expect("failed to execute shutdown command");
+
+}
+
+

@@ -137,11 +137,19 @@ fn main() {
   // play scale to indicate that the instrument is ready
   synth.play_scale(1, 48, 12);
 
+  let mut counter = 0_u32;
+
   loop {
 
-    match pin.get_value() {
-      Ok(n) if n == 1 => shutdown(&synth, &key),
-      _ => {}
+    // check shutdown switch but not every time around the loop
+    counter = counter + 1;
+    if counter == 100 {
+      counter = 0;
+
+      match pin.get_value() {
+        Ok(n) if n == 1 => shutdown(&synth, &key),
+        _ => {}
+      }
     }
 
     for i in 0 .. 8 {

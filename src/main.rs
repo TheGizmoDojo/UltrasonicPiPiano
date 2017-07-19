@@ -20,6 +20,14 @@ enum Mode {
   Linear
 }
 
+#[derive(Debug)]
+enum InstrMode {
+  /// all sensors play a single instrument, which can be cycled with a gesture
+  Single,
+  /// each sensor plays a different instrument
+  Orchestra
+}
+
 /// State associated with each key
 struct Key {
   /// The MIDI note number for the currently playing note, or 0 for no note
@@ -71,6 +79,7 @@ fn main() {
   // see https://en.wikipedia.org/wiki/General_MIDI
   // 1 = Piano, 14 = Xylophone, 18 = Percussive Organ, 41 = Violin
   let mut instruments : Vec<u8> = vec![ 1, 10, 18, 25, 41, 89, 49, 14 ];
+  let mut instrument_mode_str = "single".to_string();
 
   // we use a fixed velocity of 127 (the max value)
   let velocity = 127;
@@ -96,6 +105,8 @@ fn main() {
       .add_option(&["-c", "--gesture_change_instrument"], Store, "Gesture for changing instrument");
     ap.refer(&mut gesture_shutdown)
       .add_option(&["-s", "--gesture_shutdown"], Store, "Gesture for shutting down");
+    ap.refer(&mut instrument_mode_str)
+      .add_option(&["-i", "--instrument-mode"], Store, "Instrument mode (single or orchestra)");
     ap.refer(&mut instruments)
         .add_argument("instruments", List, "MIDI instrument numbers");
     ap.parse_args_or_exit();
@@ -104,6 +115,11 @@ fn main() {
   let mode = match mode_string.as_ref() {
     "linear" => Mode::Linear,
     _ => Mode::Modulus
+  };
+
+  let instrument_mode = match instrument_mode_str.as_ref() {
+    "single" => InstrMode::Single,
+    _ => InstrMode::Orchestra
   };
 
   println!("# cm_per_note = {}", cm_per_note);
@@ -133,7 +149,11 @@ fn main() {
   // create the synth and set instruments per channel
   let synth = Fluidsynth {};
   for i in 0 .. 8 {
-    synth.set_instrument(i as u8 + 1, instruments[instrument_index]);
+    let instrument_code = match instrument_mode {
+      InstrMode::Single => instruments[instrument_index],
+      InstrMode::Orchestra => instruments[i]
+    };
+    synth.set_instrument(i as u8 + 1, instrument_code);
   }
 
   let mut gesture : u8 = 0;
@@ -213,18 +233,24 @@ fn main() {
 
         if gesture == gesture_change_instrument {
 
-            // stop existing notes
-            for i in 0 .. 8 { synth.note_off(i+1, key[i as usize].note) }
+            match instrument_mode {
+              InstrMode::Orchestra => {},
+              InstrMode::Single => {
 
-            // choose the next instrument
-            instrument_index += 1;
-            if instrument_index == instruments.len() { instrument_index = 0; }
-            for i in 0 .. 8 { 
-              synth.set_instrument(i as u8 + 1, instruments[instrument_index]); 
+                // stop existing notes
+                for i in 0 .. 8 { synth.note_off(i+1, key[i as usize].note) }
+
+                // choose the next instrument
+                instrument_index += 1;
+                if instrument_index == instruments.len() { instrument_index = 0; }
+                for i in 0 .. 8 { 
+                  synth.set_instrument(i as u8 + 1, instruments[instrument_index]); 
+                }
+
+                // play a quick scale to indicate that the instrument changed
+                synth.play_scale(1, 48, 12);
+              }
             }
-
-            // play a quick scale to indicate that the instrument changed
-            synth.play_scale(1, 48, 12);
         } else if gesture == gesture_shutdown {
             shutdown(&synth, &key);
         }

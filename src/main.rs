@@ -64,7 +64,8 @@ fn main() {
 
   // Set the lowest note on the keyboard
   // C0 = 12, C1 = 24, C2 = 36, ...
-  let start_note = 12;
+  let mut start_note = 12;
+  let mut octave_offset = 12;
 
   // choose MIDI instrument to associate with each key
   // see https://en.wikipedia.org/wiki/General_MIDI
@@ -83,6 +84,10 @@ fn main() {
 
   {
     let mut ap = ArgumentParser::new();
+    ap.refer(&mut start_note)
+      .add_option(&["-a", "--start-note"], Store, "Start note");
+    ap.refer(&mut octave_offset)
+      .add_option(&["-o", "--octave-offset"], Store, "Octave offset per sensor");
     ap.refer(&mut cm_per_note)
       .add_option(&["-n", "--cm-per-note"], Store, "Distance allocated to each note");
     ap.refer(&mut mode_string)
@@ -163,7 +168,7 @@ fn main() {
       if distance[i] < max_distance {
 
         // the key is covered, so figure out which note to play
-        let scale_start = start_note + 12 * i as u8;
+        let scale_start = start_note + octave_offset * i as u8;
 
         // this is a bit funky ... we use modulus to pick the note within the scale ... it
         // seemed to sound better than trying to divide the distance by the number of notes
@@ -204,7 +209,7 @@ fn main() {
 
     if gesture == new_gesture {
       gesture_counter += 1;
-      if gesture_counter == 100 {
+      if gesture_counter == 150 {
 
         if gesture == gesture_change_instrument {
 
